@@ -31,6 +31,11 @@
 #include "Player.h"
 #include "Partikelsystem.h"
 #include "Timer.h"
+#include <cstring>
+#include <pwd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 // --------------------------------------------------------------------------------------
 // Endianess handling
@@ -2665,6 +2670,32 @@ void MenuClass::ShowSavegames(int Highlight)
 	}
 }
 
+char* HIGHSCORE_FULLPATH = NULL; //new char[std::strlen(BASE_PATH)+std::strlen(HIGHSCORE_FILENAME)+1];
+void releaseHighscoreStrings(void) {
+	if (HIGHSCORE_FULLPATH != NULL) {
+		delete [] HIGHSCORE_FULLPATH;
+	}
+}
+char* getHighscoreFullPath(void) {
+	if (HIGHSCORE_FULLPATH == NULL) {
+		struct passwd *pw = getpwuid(getuid());
+		const char* HOME_DIR = pw->pw_dir;
+		const char* HIGHSCORE_RELDIR = "/.hurrican/";
+		char* highscoreAbsDir =
+			new char[std::strlen(HOME_DIR)+std::strlen(HIGHSCORE_RELDIR)+1];
+		std::strcpy(highscoreAbsDir, HOME_DIR);
+		std::strcat(highscoreAbsDir, HIGHSCORE_RELDIR);
+		mkdir(highscoreAbsDir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		const char* HIGHSCORE_FILENAME = "Hurrican.hsl";
+		HIGHSCORE_FULLPATH =
+			new char[std::strlen(highscoreAbsDir)+std::strlen(HIGHSCORE_FILENAME)+1];
+		std::strcpy(HIGHSCORE_FULLPATH, highscoreAbsDir);
+		std::strcat(HIGHSCORE_FULLPATH, HIGHSCORE_FILENAME);
+	}
+	return HIGHSCORE_FULLPATH;
+}
+//atexit(releaseHighscoreStrings);
+
 // --------------------------------------------------------------------------------------
 // Highscore-Liste laden
 // --------------------------------------------------------------------------------------
@@ -2676,7 +2707,7 @@ void MenuClass::LoadHighscore(void)
 	// Versuchen, die Highscore Datei zu öffnen
 	// falls sie nicht existiert oder es eine Fehler gibt, wird die Standard
 	// Highscore gesetzt
-	fopen_s(&Datei, "Hurrican.hsl", "rb");
+	fopen_s(&Datei, getHighscoreFullPath(), "rb");
 
 
 	// Fehler beim Öffnen ? Dann standard Highscore setzen
@@ -2739,7 +2770,7 @@ void MenuClass::SaveHighscore(void)
 	FILE *Datei;			// Savegame Datei
 
 	// Highscore Datei öffnen
-	fopen_s(&Datei, "Hurrican.hsl", "wb");
+	fopen_s(&Datei, getHighscoreFullPath(), "wb");
 
 	// Fehler beim Öffnen ? Dann standard Highscore setzen
 	//
