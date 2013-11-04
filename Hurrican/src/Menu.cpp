@@ -2670,7 +2670,7 @@ void MenuClass::ShowSavegames(int Highlight)
 	}
 }
 
-char* HIGHSCORE_FULLPATH = NULL; //new char[std::strlen(BASE_PATH)+std::strlen(HIGHSCORE_FILENAME)+1];
+char* HIGHSCORE_FULLPATH = NULL;
 void releaseHighscoreStrings(void) {
 	if (HIGHSCORE_FULLPATH != NULL) {
 		delete [] HIGHSCORE_FULLPATH;
@@ -2691,6 +2691,7 @@ char* getHighscoreFullPath(void) {
 			new char[std::strlen(highscoreAbsDir)+std::strlen(HIGHSCORE_FILENAME)+1];
 		std::strcpy(HIGHSCORE_FULLPATH, highscoreAbsDir);
 		std::strcat(HIGHSCORE_FULLPATH, HIGHSCORE_FILENAME);
+		delete [] highscoreAbsDir;
 	}
 	return HIGHSCORE_FULLPATH;
 }

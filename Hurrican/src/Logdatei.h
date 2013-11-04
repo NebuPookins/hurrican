@@ -19,12 +19,13 @@
 class Logdatei
 {
 	private:
-		char itsFilename[20];								// Dateiname der Log-Datei
+		static const int MAX_FILENAME = 256;
+		char itsFilename[MAX_FILENAME];								// Dateiname der Log-Datei
 
 	public:
 		bool	delLogFile;									// Logfile am Ende löschen, wenn kein Fehler auftrat
 
-		     Logdatei    (const char Name[20]);					// Konstruktor
+		     Logdatei    (const char Name[MAX_FILENAME]);					// Konstruktor
 			~Logdatei    (void);							// Desktruktor;
 		void WriteText   (const char Text[180], bool Abbruch);	// Text in Datei schreiben
 		void WriteValue  (int value);						// Wert in Datei schreiben

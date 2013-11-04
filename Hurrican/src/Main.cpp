@@ -57,6 +57,11 @@
 #include "Tileengine.h"
 #include "Timer.h"
 #include "unrarlib.h"
+#include <cstring>
+#include <pwd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -99,10 +104,37 @@ float					SpeedFaktor = 1.0f;				// Faktor, mit dem alle Bewegungen verrechnet w
 DirectGraphicsClass		DirectGraphics;					// Grafik-Objekt
 DirectInputClass		DirectInput;					// Input-Objekt
 TimerClass				*pTimer;						// Timer Klasse für die Framerate
+
+char* GAMELOG_FULLPATH = NULL;
+char* getGamelogFullPath(void) {
+	if (GAMELOG_FULLPATH == NULL) {
+		//
+		struct passwd *pw = getpwuid(getuid());
+		const char* HOME_DIR = pw->pw_dir;
+		const char* GAMELOG_RELDIR = "/.hurrican/";
+		char* gamelogAbsDir =
+			new char[std::strlen(HOME_DIR)+std::strlen(GAMELOG_RELDIR)+1];
+		std::strcpy(gamelogAbsDir, HOME_DIR);
+		std::strcat(gamelogAbsDir, GAMELOG_RELDIR);
+		mkdir(gamelogAbsDir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		//
+		const char* GAMELOG_FILENAME = "Game_Log.txt";
+		GAMELOG_FULLPATH =
+			new char[std::strlen(gamelogAbsDir)+std::strlen(GAMELOG_FILENAME)+1];
+		//
+		std::strcpy(GAMELOG_FULLPATH, gamelogAbsDir);
+		std::strcat(GAMELOG_FULLPATH, GAMELOG_FILENAME);
+		delete [] gamelogAbsDir;
+	}
+	cout << "got here" << std::endl;
+	return GAMELOG_FULLPATH;
+}
+
+
 #if defined(__AROS__)
 Logdatei				Protokoll("T:Game_Log.txt");		// Protokoll Datei
 #else
-Logdatei				Protokoll("Game_Log.txt");		// Protokoll Datei
+Logdatei				Protokoll(getGamelogFullPath());		// Protokoll Datei
 #endif
 CSoundManager			*pSoundManager =  NULL;			// Sound Manager
 DirectGraphicsFont		*pDefaultFont = new(DirectGraphicsFont);
@@ -640,7 +672,7 @@ int main(int argc, char *argv[])
 
 	// Kein Fehler im Game? Dann Logfile löschen
 	if (Protokoll.delLogFile == true)
-		DeleteFile("Game_Log.txt");
+		DeleteFile(getGamelogFullPath());
 
 #if defined(PLATFORM_DIRECTX)
 	return(message.wParam);										// Rückkehr zu Windows

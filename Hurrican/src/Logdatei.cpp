@@ -40,7 +40,7 @@ extern bool					GameRunning;				// Läuft das Spiel noch ?
 // erstellt eine neue Logdatei mit dem Namen "Name"
 // --------------------------------------------------------------------------------------
 
-Logdatei::Logdatei(const char Name[20])
+Logdatei::Logdatei(const char Name[MAX_FILENAME])
 {
 	int len = strlen(Name) + 1;
 	strcpy_s(itsFilename, len, Name);							// Namen sichern
