@@ -1,0 +1,5 @@
+# Ignore compiled source everywhere.
+*.o
+
+# Specifically ignore the final compiled binary that gets produced.
+/Hurrican/hurricanlinux
