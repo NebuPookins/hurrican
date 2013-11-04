@@ -18,7 +18,6 @@
 // Defines
 // --------------------------------------------------------------------------------------
 
-#define CONFIGFILE "Hurrican.cfg"				// Name der Konfigurationsdatei
 #define TUTORIAL_END 99
 
 #define DETAIL_LOW		0						// alles total billig

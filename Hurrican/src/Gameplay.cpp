@@ -33,6 +33,11 @@
 #include "Projectiles.h"
 #include "Tileengine.h"
 #include "Timer.h"
+#include <cstring>
+#include <pwd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 // --------------------------------------------------------------------------------------
 // Gameplay Variablen
@@ -672,6 +677,34 @@ void CreateDefaultConfig(void)
 	SaveConfig ();
 }
 
+char* CONFIG_FULLPATH = NULL;
+void releaseConfigStrings(void) {
+	if (CONFIG_FULLPATH != NULL) {
+		delete [] CONFIG_FULLPATH;
+	}
+}
+char* getConfigFullPath(void) {
+	if (CONFIG_FULLPATH == NULL) {
+		struct passwd *pw = getpwuid(getuid());
+		const char* HOME_DIR = pw->pw_dir;
+		const char* CONFIG_RELDIR = "/.hurrican/";
+		char* configAbsDir =
+			new char[std::strlen(HOME_DIR)+std::strlen(CONFIG_RELDIR)+1];
+		std::strcpy(configAbsDir, HOME_DIR);
+		std::strcat(configAbsDir, CONFIG_RELDIR);
+		mkdir(configAbsDir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		const char* CONFIG_FILENAME = "Hurrican.cfg";
+		CONFIG_FULLPATH =
+			new char[std::strlen(configAbsDir)+std::strlen(CONFIG_FILENAME)+1];
+		std::strcpy(CONFIG_FULLPATH, configAbsDir);
+		std::strcat(CONFIG_FULLPATH, CONFIG_FILENAME);
+		delete [] configAbsDir;
+	}
+	return CONFIG_FULLPATH;
+}
+//atexit(releaseConfigStrings);
+
+
 // --------------------------------------------------------------------------------------
 // Konfiguration mit den Sound-Lautstärken laden
 // Existiert diese Datei nicht, so werden die Lautstärken auf den
@@ -684,7 +717,7 @@ bool LoadConfig(void)
 
 	FILE *Datei = NULL;
 
-	fopen_s(&Datei, CONFIGFILE, "rb");		// versuchen Datei zu öffnen
+	fopen_s(&Datei, getConfigFullPath(), "rb");		// versuchen Datei zu öffnen
 
 	if (Datei == NULL)
 		return false;
@@ -770,7 +803,7 @@ void SaveConfig(void)
 
 	FILE *Datei = NULL;
 
-	fopen_s(&Datei, CONFIGFILE, "wb");
+	fopen_s(&Datei, getConfigFullPath(), "wb");
 	if (Datei == NULL)
     {
    		Protokoll.WriteText("Config file saving failed !\n", false);
